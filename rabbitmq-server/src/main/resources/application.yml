@@ -1,0 +1,15 @@
+server:
+  port: 9011
+spring:
+  application:
+    name: rabbitmq-server
+  profiles:
+    active: dev
+  rabbitmq:
+    host: 192.168.80.129
+    virtual-host: /test
+    username: test
+    password: test
+    ###开启消息确认机制 confirms
+    publisher-confirms: true
+    publisher-returns: true

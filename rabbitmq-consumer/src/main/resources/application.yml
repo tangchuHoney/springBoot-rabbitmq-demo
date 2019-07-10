@@ -1,0 +1,15 @@
+server:
+  port: 9012
+spring:
+  application:
+    name: rabbit-consumer
+  rabbitmq:
+    host: 192.168.80.129
+    virtual-host: /test
+    username: test
+    password: test
+    #采用手动应答
+    listener:
+      simple:
+        acknowledge-mode: manual
+
