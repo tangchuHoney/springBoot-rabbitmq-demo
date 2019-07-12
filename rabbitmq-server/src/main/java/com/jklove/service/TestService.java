@@ -51,6 +51,30 @@ public class TestService implements RabbitTemplate.ReturnCallback{
 
     @Override
     public void returnedMessage(Message message, int i, String s, String s1, String s2) {
-        System.out.println(">>>>>>>>>接收到消费端回应，消息已被退回，未正常消费,当前时间为:"+DateUtil.format(new Date(), DatePattern.NORM_DATETIME_MS_FORMAT)+"<<<<<<");
+        log.info(">>>>>>>>>接收到消费端回应，消息已被退回，未正常消费,当前时间为:"+DateUtil.format(new Date(), DatePattern.NORM_DATETIME_MS_FORMAT)+"<<<<<<");
+    }
+
+    //延迟订单
+    public ResponseEntity createOrder(String message) {
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("order", "我是订单信息");
+        msg.put("reject", message);
+        try {
+            //设置手动ack
+            rabbitTemplate.setReturnCallback(this);
+            rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+                if (!ack) {
+                    log.info(">>>>>>消息发送失败,原因:" + cause + correlationData.toString());
+                } else {
+                    log.info(">>>>>>>消息发送成功，当前时间为:"+ DateUtil.format(new Date(), DatePattern.NORM_DATETIME_MS_FORMAT));
+                }
+            });
+            //发送给延迟交换机
+            rabbitTemplate.convertAndSend("X-Exchange-ttl","ttl",msg);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 }
